@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import "reflect-metadata";
 import { IRoutes, Method, ROUTES } from "./method.decorator";
+import { IParam, SupportedDecorators, SupportedType } from "./param.decorator";
 export const handler = (Controller: Function) => {
   //@ts-ignore
   const instance = new Controller();
@@ -8,7 +9,21 @@ export const handler = (Controller: Function) => {
     const routes: IRoutes[] = Reflect.getMetadata(ROUTES, Controller);
     for (const route of routes) {
       if (req.method === route.method) {
-        const result = await instance[route.name](req, res);
+        const params: IParam[] =
+          Reflect.getMetadata(SupportedDecorators.METHOD_PARAM, Controller) ||
+          [];
+        const bodies: IParam[] =
+          Reflect.getMetadata(SupportedDecorators.BODY, Controller) || [];
+        const paramList = [...params, ...bodies];
+        paramList.sort((a, b) => a.index - b.index);
+
+        const methodParams = paramList.map((item) => {
+          if (item.type === SupportedType.PARAM) return req.query[item.path!];
+          if (item.type === SupportedType.BODY)
+            return item.path ? req.body[item.path] : req.body;
+        });
+
+        const result = await instance[route.name](...methodParams);
         return res.json(result);
       }
     }
