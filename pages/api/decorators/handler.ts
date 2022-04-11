@@ -7,23 +7,7 @@ export const handler = (Controller: Function) => {
   return async (req: NextApiRequest, res: NextApiResponse) => {
     const routes: IRoutes[] = Reflect.getMetadata(ROUTES, Controller);
     for (const route of routes) {
-      if (req.method === Method.GET && route.method === Method.GET) {
-        const result = await instance[route.name](req, res);
-        return res.json(result);
-      }
-      if (req.method === Method.POST && route.method === Method.POST) {
-        const result = await instance[route.name](req, res);
-        return res.json(result);
-      }
-      if (req.method === Method.PATCH && route.method === Method.PATCH) {
-        const result = await instance[route.name](req, res);
-        return res.json(result);
-      }
-      if (req.method === Method.PUT && route.method === Method.PUT) {
-        const result = await instance[route.name](req, res);
-        return res.json(result);
-      }
-      if (req.method === Method.DELETE && route.method === Method.DELETE) {
+      if (req.method === route.method) {
         const result = await instance[route.name](req, res);
         return res.json(result);
       }
