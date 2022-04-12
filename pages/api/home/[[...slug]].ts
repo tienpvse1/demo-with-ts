@@ -1,7 +1,7 @@
 import type { User } from "@prisma/client";
 import { AutoInject, Controller } from "../decorators/controller.decorator";
 import { handler } from "../decorators/handler";
-import { Get, Post } from "../decorators/method.decorator";
+import { Delete, Get, Patch, Post } from "../decorators/method.decorator";
 import { Body, Param } from "../decorators/param.decorator";
 import { HomeService } from "./home.service";
 
@@ -10,22 +10,28 @@ import { HomeService } from "./home.service";
 export class MyController {
   constructor(private service: HomeService) {}
 
-  @Get(":slug")
-  async getItem(@Param("slug") id: string) {
-    console.log("short route get execute");
-    return { message: `match ${id}` };
+  @Get()
+  getAll() {
+    return this.service.findAll();
   }
-  @Get("item/:id2")
-  async getItem2(@Param("id2") id: string) {
-    console.log("long route get execute");
 
-    return { message: `match ${id}` };
+  @Get(":id")
+  async getItem(@Param("id") id: string) {
+    return this.service.findById(id);
   }
   @Post()
   async postItem(@Body() body: User) {
-    console.log(body);
-    return { body };
-    // return this.service.create(body);
+    return this.service.create(body);
+  }
+
+  @Delete(":id")
+  async delete(@Param("id") id: string) {
+    return this.service.delete(id);
+  }
+
+  @Patch(":id")
+  async updateItem(@Param("id") id: string, @Body() body: Partial<User>) {
+    return this.service.update(id, body);
   }
 }
 

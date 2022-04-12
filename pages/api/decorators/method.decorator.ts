@@ -65,7 +65,7 @@ export const Delete = (path = ""): MethodDecorator => {
     Reflect.defineMetadata(ROUTES, routes, target.constructor);
   };
 };
-export const PATCH = (path = ""): MethodDecorator => {
+export const Patch = (path = ""): MethodDecorator => {
   return (target, key) => {
     if (path.startsWith("/")) path = path.substring(1);
     if (path.endsWith("/")) path = path.substring(0, path.length - 1);
