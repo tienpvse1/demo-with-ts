@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 export enum SupportedDecorators {
   METHOD_PARAM = "method:param",
   QUERY = "method:query",
@@ -13,10 +15,11 @@ export interface IParam {
   path?: string;
   index: number;
   type: SupportedType;
+  ownerName: string;
 }
 
 export const Param = (path: string): ParameterDecorator => {
-  return (target, _, index) => {
+  return (target, key, index) => {
     if (
       !Reflect.getMetadata(SupportedDecorators.METHOD_PARAM, target.constructor)
     ) {
@@ -30,10 +33,12 @@ export const Param = (path: string): ParameterDecorator => {
       SupportedDecorators.METHOD_PARAM,
       target.constructor
     );
+
     params.push({
       path,
       index,
       type: SupportedType.PARAM,
+      ownerName: Reflect.getOwnPropertyDescriptor(target, key)?.value.name,
     });
     Reflect.defineMetadata(
       SupportedDecorators.METHOD_PARAM,
@@ -42,8 +47,8 @@ export const Param = (path: string): ParameterDecorator => {
     );
   };
 };
-export const Body = (path?: string): ParameterDecorator => {
-  return (target, _, index) => {
+export const Body = (path = ""): ParameterDecorator => {
+  return (target, key, index) => {
     if (!Reflect.getMetadata(SupportedDecorators.BODY, target.constructor)) {
       Reflect.defineMetadata(SupportedDecorators.BODY, [], target.constructor);
     }
@@ -55,6 +60,7 @@ export const Body = (path?: string): ParameterDecorator => {
       path,
       index,
       type: SupportedType.BODY,
+      ownerName: Reflect.getOwnPropertyDescriptor(target, key)?.value.name,
     });
     Reflect.defineMetadata(
       SupportedDecorators.BODY,

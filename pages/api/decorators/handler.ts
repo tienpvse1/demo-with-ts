@@ -1,10 +1,16 @@
+import "reflect-metadata";
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import "reflect-metadata";
+import { match } from "path-to-regexp";
 import { container } from "tsyringe";
 import { PRISMA_CLIENT } from "./controller.decorator";
 import { IRoutes, ROUTES } from "./method.decorator";
-import { IParam, SupportedDecorators, SupportedType } from "./param.decorator";
+import {
+  Body,
+  IParam,
+  SupportedDecorators,
+  SupportedType,
+} from "./param.decorator";
 export const handler = (Controller: Function) => {
   container.register<PrismaClient>(PRISMA_CLIENT, {
     useValue: new PrismaClient(),
@@ -13,22 +19,37 @@ export const handler = (Controller: Function) => {
   container.resolve(Controller);
   //@ts-ignore
   const instance = new Controller();
+  const path: string = Reflect.getMetadata("controller:prefix", Controller);
   return async (req: NextApiRequest, res: NextApiResponse) => {
     const routes: IRoutes[] = Reflect.getMetadata(ROUTES, Controller);
     for (const route of routes) {
-      if (req.method === route.method) {
-        const params: IParam[] =
+      let fullPath = "/" + path;
+      if (route.path.length > 0) {
+        fullPath += "/" + route.path;
+      }
+
+      const matchUrl = match(fullPath, { decode: decodeURIComponent });
+      const matchResult = matchUrl(req.url!);
+
+      if (req.method === route.method && matchResult) {
+        let params: IParam[] =
           Reflect.getMetadata(SupportedDecorators.METHOD_PARAM, Controller) ||
           [];
-        const bodies: IParam[] =
+        let bodies: IParam[] =
           Reflect.getMetadata(SupportedDecorators.BODY, Controller) || [];
+        params = params.filter((item) => item.ownerName === route.name);
+        bodies = bodies.filter((item) => item.ownerName === route.name);
         const paramList = [...params, ...bodies];
         paramList.sort((a, b) => a.index - b.index);
 
         const methodParams = paramList.map((item) => {
-          if (item.type === SupportedType.PARAM) return req.query[item.path!];
-          if (item.type === SupportedType.BODY)
-            return item.path ? req.body[item.path] : req.body;
+          if (item.type === SupportedType.PARAM) {
+            // @ts-ignore
+            return matchResult.params[item.path!];
+          }
+          if (item.type === SupportedType.BODY) {
+            return req.body;
+          }
         });
 
         const result = await instance[route.name](...methodParams);
