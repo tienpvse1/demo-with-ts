@@ -5,7 +5,11 @@ import { HomeRepository } from "./home.repository";
 export class HomeService {
   constructor(private repository: HomeRepository) {}
 
-  sayHello() {
-    return this.repository.sayHello();
+  findById(id: string) {
+    return this.repository.findById(id);
+  }
+
+  create({ name }: { name: string }) {
+    return this.repository.create({ name });
   }
 }

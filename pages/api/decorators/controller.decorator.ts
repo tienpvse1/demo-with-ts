@@ -1,4 +1,4 @@
-import { autoInjectable } from "tsyringe";
+import { autoInjectable, inject } from "tsyringe";
 import { ROUTES } from "./method.decorator";
 
 export const Controller = (): ClassDecorator => {
@@ -10,3 +10,5 @@ export const Controller = (): ClassDecorator => {
 };
 
 export const AutoInject = autoInjectable;
+export const Inject = inject;
+export const PRISMA_CLIENT = "PrismaClient";

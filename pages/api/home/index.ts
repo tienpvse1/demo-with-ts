@@ -9,13 +9,11 @@ import { HomeService } from "../services/home.service";
 @AutoInject()
 class Controller {
   client = new PrismaClient();
-
   constructor(private service: HomeService) {}
+
   @Get()
   async getItem(@Param("id") id: string) {
-    if (id) return this.client.user.findFirst({ where: { id } });
-
-    return this.service.sayHello();
+    return this.service.findById(id);
   }
 
   @Post()

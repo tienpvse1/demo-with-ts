@@ -1,9 +1,14 @@
+import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import "reflect-metadata";
 import { container } from "tsyringe";
+import { PRISMA_CLIENT } from "./controller.decorator";
 import { IRoutes, ROUTES } from "./method.decorator";
 import { IParam, SupportedDecorators, SupportedType } from "./param.decorator";
 export const handler = (Controller: Function) => {
+  container.register<PrismaClient>(PRISMA_CLIENT, {
+    useValue: new PrismaClient(),
+  });
   //@ts-ignore
   container.resolve(Controller);
   //@ts-ignore
