@@ -1,8 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import "reflect-metadata";
-import { IRoutes, Method, ROUTES } from "./method.decorator";
+import { container } from "tsyringe";
+import { IRoutes, ROUTES } from "./method.decorator";
 import { IParam, SupportedDecorators, SupportedType } from "./param.decorator";
 export const handler = (Controller: Function) => {
+  //@ts-ignore
+  container.resolve(Controller);
   //@ts-ignore
   const instance = new Controller();
   return async (req: NextApiRequest, res: NextApiResponse) => {

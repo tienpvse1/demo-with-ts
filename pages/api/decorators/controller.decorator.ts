@@ -1,3 +1,4 @@
+import { autoInjectable } from "tsyringe";
 import { ROUTES } from "./method.decorator";
 
 export const Controller = (): ClassDecorator => {
@@ -7,3 +8,5 @@ export const Controller = (): ClassDecorator => {
     }
   };
 };
+
+export const AutoInject = autoInjectable;
